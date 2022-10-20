@@ -72,6 +72,7 @@ export default Vue.extend({
       if (!this.eventGroup || !this.eventGroup.range) {
         return 100;
       }
+      console.log('fullWidth=====')
       return this.distanceBetweenDates(
         this.eventGroup.range.min,
         this.eventGroup.range.latest

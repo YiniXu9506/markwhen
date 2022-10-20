@@ -192,9 +192,7 @@ export default Vue.extend({
       return !!this.supplemental.length;
     },
     eventRowStyle(): string {
-      const leftMargin = this.distanceFromBaselineLeftmostDate(
-        this.tempFrom ? this.tempFrom : this.event.ranges.date.fromDateTime
-      );
+      const leftMargin = this.distanceFromBaselineLeftmostDate(this.event.ranges.date.fromDateTime);
       return `margin-left: ${leftMargin}px;`;
     },
     photoBarClass(): string {
@@ -220,24 +218,31 @@ export default Vue.extend({
       return `width: 10px; ${this.barColor}; top: calc(0.5rem + 3px)`;
     },
     width(): number {
+      console.log('in computed width', this.event)
       if (this.tempTo && this.tempFrom) {
+        console.log("1")
         return this.getWidthForRange({
           fromDateTime: this.tempFrom,
           toDateTime: this.tempTo,
         });
       }
       if (this.tempTo) {
+
+        console.log("2")
         return this.getWidthForRange({
           fromDateTime: this.event.ranges.date.fromDateTime,
           toDateTime: this.tempTo,
         });
       }
       if (this.tempFrom) {
+
+        console.log("3")
         return this.getWidthForRange({
           fromDateTime: this.tempFrom,
           toDateTime: this.event.ranges.date.toDateTime,
         });
       }
+
       return this.getWidthForRange(this.event.ranges.date);
     },
   },
@@ -422,7 +427,10 @@ export default Vue.extend({
         range.fromDateTime,
         range.toDateTime
       );
+
       const newWidth = Math.max(EVENT_HEIGHT_PX, distance);
+      console.log('=====getWidthForRange======', newWidth)
+
       return newWidth;
     },
   },

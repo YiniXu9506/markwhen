@@ -1,7 +1,7 @@
 <template>
   <div class="fixed inset-0 pointer-events-none">
     <div class="timeMarkerContainer h-full">
-      <div class="flex h-full" :style="`margin-left: -${leftMargin}px`">
+      <div class="flex h-full">
         <div
           class="timeMarkerShader w-full h-12 fixed top-0"
           :style="`margin-left: ${leftMargin}px; background: linear-gradient(${
@@ -15,6 +15,7 @@
           :key="timeMarker.ts"
           :dateTime="timeMarker.dateTime"
           :size="timeMarker.size"
+          :schema="timeMarker.schema"
         />
       </div>
     </div>

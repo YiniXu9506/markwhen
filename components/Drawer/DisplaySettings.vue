@@ -54,7 +54,9 @@ export default Vue.extend({
       let maxSelection = 1000;
       let minWidth = Math.log(MIN_SCALE);
       let maxWidth = Math.log(MAX_SCALE);
+      console.log("minWidth", minWidth, maxWidth)
       const scale = (maxWidth - minWidth) / (maxSelection - minSelection);
+      console.log('Math.exp(minWidth + scale * (val - minSelection))', scale, Math.exp(minWidth + scale * (val - minSelection)))
       this.updateWidth(Math.exp(minWidth + scale * (val - minSelection)));
     },
     "$store.getters.settings": {

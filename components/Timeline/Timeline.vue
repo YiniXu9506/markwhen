@@ -15,8 +15,8 @@
       @startMakingEvent="startMakingEvent"
     />
     <TimeMarkersFront :markers="markers" />
-    <drawer-header />
-    <resize-observer @notify="handleResize" />
+    <!-- <drawer-header /> -->
+    <!-- <resize-observer @notify="handleResize" /> -->
   </div>
 </template>
 

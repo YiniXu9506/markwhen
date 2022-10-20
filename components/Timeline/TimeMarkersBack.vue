@@ -3,7 +3,6 @@
     <div class="timeMarkerContainer h-full">
       <div
         class="flex flex-row h-full"
-        :style="`margin-left: -${leftMargin}px`"
       >
         <time-marker-back
           v-for="timeMarker in markers"

@@ -50,7 +50,31 @@ export interface TimeMarker {
   dateTime: DateTime;
   size: number;
   left: number;
+  schema: string;
 }
+
+export const MARKERS = [
+  "table 1",
+  "table 2",
+  "table 3",
+  "table 4",
+  "table 5",
+  "table 6",
+  "table 7",
+  "table 8",
+  "table 9",
+  "table 10",
+  "table 11",
+  "table 12",
+  "table 13",
+  "table 14",
+  "table 15",
+  "table 16",
+  "table 17",
+  "table 18",
+  "table 19",
+  "table 20",
+];
 
 export const MIN_SCALE = 0.1;
 export const MAX_SCALE = 3000;
@@ -127,7 +151,7 @@ interface Viewport {
   top: number;
 }
 
-const diffScale = "days";
+const diffScale = "years";
 
 const SECOND = 1;
 const MINUTE = 60;
@@ -150,8 +174,8 @@ function blankSettings(): Settings {
   return {
     scale: initialScale,
     viewportDateInterval: {
-      from: DateTime.now().minus({ years: 10 }),
-      to: DateTime.now().plus({ years: 10 }),
+      from: DateTime.now().minus({ year: 0 }),
+      to: DateTime.now().plus({ year: MARKERS.length }),
     },
     viewport: { left: 0, width: 0, top: 0 },
     sort: "none",
@@ -281,11 +305,11 @@ export const mutations: MutationTree<State> = {
     }
   },
   setScale(state: State, width: number) {
+    console.log("in set Scale");
     const scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, width));
     state.settings[state.cascadeIndex].scale = scale;
   },
   setEventsString(state: State, str: string) {
-    // console.log("setting events string");
     state.eventsString = str;
     if (process.browser) {
       localStorage.setItem("__draft", str);
@@ -504,8 +528,10 @@ export const getters: GetterTree<State, State> = {
     };
   },
   distanceBetweenDates(state: State, getters: any) {
+    console.log("settgin scale", getters.settings.scale);
     return (a: DateTime, b: DateTime) =>
-      b.diff(a).as(diffScale) * getters.settings.scale;
+      (b.diff(a).as(diffScale) * getters.settings.viewport.width) /
+      MARKERS.length;
   },
   baselineLeftmostDate(state: State, getters: any) {
     const metadata = getters.metadata as CascadeMetadata;
@@ -534,9 +560,12 @@ export const getters: GetterTree<State, State> = {
     );
   },
   distanceFromBaselineLeftmostDate(state: State, getters: any) {
-    return (a: DateTime) =>
-      a.diff(getters.baselineLeftmostDate).as(diffScale) *
-      getters.settings.scale;
+    return (a: DateTime) => {
+      return (
+        a.diff(getters.baselineLeftmostDate).as(diffScale) *
+        getters.settings.scale
+      );
+    };
   },
   viewportDateInterval(state: State, getters: any): DateInterval {
     if (
@@ -567,7 +596,11 @@ export const getters: GetterTree<State, State> = {
       const rightDate = earliest.plus({
         [diffScale]: (scrollLeft + width) / getters.settings.scale,
       });
-      return { from: leftDate, to: rightDate };
+      return {
+        from: DateTime.fromISO(getters.settings.viewportDateInterval.from),
+        to: DateTime.fromISO(getters.settings.viewportDateInterval.to),
+      };
+      // return { from: leftDate, to: rightDate };
     };
   },
   timeMarkerWeights(state: State, getters: any): TimeMarkerWeights {
@@ -575,6 +608,7 @@ export const getters: GetterTree<State, State> = {
       .diff(getters.viewportDateInterval.from)
       .as("seconds");
     const width = getters.settings.viewport.width;
+
     const denom = diff / (width / 2000);
     return [
       clamp(roundToTwoDecimalPlaces((30 * SECOND) / denom)),
@@ -600,6 +634,7 @@ export const getters: GetterTree<State, State> = {
   },
   scaleOfViewportDateInterval(state: State, getters: any): DisplayScale {
     const weights = getters.timeMarkerWeights;
+
     for (let i = 0; i < weights.length; i++) {
       if (weights[i] > timeMarkerWeightMinimum) {
         return scales[i];
@@ -623,15 +658,19 @@ export const getters: GetterTree<State, State> = {
       size: getters.distanceBetweenDates(leftViewportDate, nextLeft),
       left: getters.distanceBetweenDates(leftViewportDate, nextLeft),
       ts: leftViewportDate.toMillis(),
+      schema: "",
     });
 
+    let markerIndex = 0;
+
     // 256 is an arbitrary number
-    while (nextLeft < rightmost && markers.length < 256) {
+    while (nextLeft < rightmost && markerIndex < MARKERS.length - 1) {
       markers.push({
         dateTime: nextLeft,
         size: 0,
         ts: nextLeft.toMillis(),
         left: getters.distanceBetweenDates(leftViewportDate, nextLeft),
+        schema: "",
       });
       if (scale === "decade") {
         nextLeft = nextLeft.plus({ years: 10 });
@@ -642,6 +681,8 @@ export const getters: GetterTree<State, State> = {
         markers[markers.length - 1].dateTime,
         nextLeft
       );
+
+      markerIndex++;
     }
 
     // Get the last one
@@ -649,12 +690,18 @@ export const getters: GetterTree<State, State> = {
       markers[markers.length - 1].dateTime,
       rightmost
     );
-    // console.log('scale:', scale)
-    // console.log('from', leftViewportDate.toLocaleString(), 'to', rightViewportDate.toLocaleString())
-    // console.log('num markers:', markers.length)
-    // console.log('leftmost marker', m(markers[0]))
-    // console.log('rightmost marker', m(markers[markers.length - 1]))
-    // console.log('')
+    console.log("markers", markers);
+    // console.log("scale:", scale);
+    // console.log(
+    //   "from",
+    //   leftViewportDate.toLocaleString(),
+    //   "to",
+    //   rightViewportDate.toLocaleString()
+    // );
+    // console.log("num markers:", markers.length);
+    // console.log("leftmost marker", m(markers[0]));
+    // console.log("rightmost marker", m(markers[markers.length - 1]));
+    // console.log("");
     return markers;
   },
 };
@@ -837,8 +884,10 @@ export const actions: ActionTree<State, State> = {
       viewport.left,
       viewport.width
     );
+    console.log("in setViewport");
     commit("setViewport", viewport);
     commit("setViewportDateInterval", viewportInterval);
+    commit("setScale", viewport.width / MARKERS.length);
   },
   moveEventUpOrDown(
     { state, commit, getters },
